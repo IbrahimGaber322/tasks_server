@@ -4,23 +4,15 @@ import User from "../models/user";
 
 export const getTasks = async (req: any, res: any) => {
   const { userEmail } = req;
-  const { page = "1" } = req.query;
-  console.log(`getTaks page: ${page}`);
+  const { page } = req.query;
+  console.log(`getTaks page: ${typeof page}`);
   try {
     const user = await User.findOne({ email: userEmail });
     const LIMIT = 10;
     const startIndex = (Number(page) - 1) * LIMIT;
     const total = await Task.countDocuments({ creator: userEmail });
     const tasks = await Task.find(
-      { creator: userEmail },
-      {
-        title: 1,
-        content: 1,
-        creator: 1,
-        tags: 1,
-        createdAt: 1,
-      }
-    )
+      { creator: userEmail })
       .sort({ _id: -1 })
       .limit(LIMIT)
       .skip(startIndex);
@@ -86,15 +78,7 @@ export const getTasksBySearch = async (req: any, res: any) => {
               { tags: { $all: tags } },
               { creator: userEmail },
             ],
-          },
-          {
-            title: 1,
-            content: 1,
-            creator: 1,
-            tags: 1,
-            createdAt: 1,
-          }
-        )
+          })
           .sort({ _id: -1 })
           .limit(LIMIT)
           .skip(startIndex);
@@ -113,15 +97,7 @@ export const getTasksBySearch = async (req: any, res: any) => {
           $and: [{ tags: { $all: tags } }, { creator: userEmail }],
         });
         tasks = await Task.find(
-          { $and: [{ tags: { $all: tags } }, { creator: userEmail }] },
-          {
-            title: 1,
-            content: 1,
-            creator: 1,
-            tags: 1,
-            createdAt: 1,
-          }
-        )
+          { $and: [{ tags: { $all: tags } }, { creator: userEmail }] })
           .sort({ _id: -1 })
           .limit(LIMIT)
           .skip(startIndex);
@@ -206,9 +182,11 @@ export const deleteTask = async (req: any, res: any) => {
 };
 
 export const comment = async (req: any, res: any) => {
+    console.log("yoo");
   try {
     const { id } = req.params;
     const comment = req.body;
+    console.log(comment);
     if (!mongoose.Types.ObjectId.isValid(id))
       return res.status(404).send("No task with that id");
     const task = await Task.findById(id);

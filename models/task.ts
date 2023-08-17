@@ -8,13 +8,17 @@ const commentSchema = new mongoose.Schema({
    createdAt: {
       type: Date,
       default: ()=> new Date()
-     }
+     },
+   name:String
 })
 
 const taskSchecma = new mongoose.Schema({
    title: {type:String, require:true},
+   name:{type:String, require:true},
+   isCompleted:{type:Boolean, default:false},
    content: [{text:String, done:Boolean}],
-   creator: String,
+   creator: {type:String, require:true},
+   dueDate:{type:Date, require:true},
    tags: [String],
    createdAt: {
     type: Date,

@@ -7,7 +7,7 @@ export const userSchecma = new mongoose.Schema({
   lastName: { type:String, require: true },
   email: { type:String, require: true },
   password: { type:String, require: true },
-  name:{type: String},
+  name:{type: String, require:true},
   confirmed: {type:Boolean,default:false},
 });
 
