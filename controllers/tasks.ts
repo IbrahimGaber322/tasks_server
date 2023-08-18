@@ -4,18 +4,32 @@ import User from "../models/user";
 
 export const getTasks = async (req: any, res: any) => {
   const { userEmail } = req;
-  const { page } = req.query;
+  const { page , sort } = req.query;
+  
+  console.log(req.query);
   console.log(`getTaks page: ${typeof page}`);
+  
   try {
+    let sorter: any = {};
+    if (sort === "createdAt") {
+      sorter.createdAt = -1;
+    } else if (sort === "completed") {
+      sorter.isCompleted = -1;
+    } else if (sort === "notCompleted") {
+      sorter.isCompleted = 1;
+    } else if (sort === "dueDate") {
+      sorter.dueDate = 1;
+    }
     const user = await User.findOne({ email: userEmail });
     const LIMIT = 10;
     const startIndex = (Number(page) - 1) * LIMIT;
     const total = await Task.countDocuments({ creator: userEmail });
     const tasks = await Task.find(
       { creator: userEmail })
-      .sort({ _id: -1 })
+      .sort(sorter)
       .limit(LIMIT)
-      .skip(startIndex);
+      .skip(startIndex);    
+    
 
     res
       .status(200)
@@ -46,7 +60,7 @@ export const getTask = async (req: any, res: any) => {
 export const getTasksBySearch = async (req: any, res: any) => {
   const { userEmail } = req;
   const LIMIT = 10;
-  const { searchQuery, searchTags, page } = req.query;
+  const { searchQuery, searchTags, page, sort } = req.query;
   console.log(`getTasksBYSearch page: ${page}`);
   const startIndex = (Number(page) - 1) * LIMIT;
   const tagsSet =
@@ -61,6 +75,16 @@ export const getTasksBySearch = async (req: any, res: any) => {
   try {
     let total;
     let tasks;
+    let sorter: any = {};
+    if (sort === "createdAt") {
+      sorter.createdAt = -1;
+    } else if (sort === "completed") {
+      sorter.isCompleted = -1;
+    } else if (sort === "notCompleted") {
+      sorter.isCompleted = 1;
+    } else if (sort === "dueDate") {
+      sorter.dueDate = 1;
+    }
     const user = await User.findOne({ email: userEmail });
     if (currentPage) {
       if (tags && title) {
@@ -79,7 +103,7 @@ export const getTasksBySearch = async (req: any, res: any) => {
               { creator: userEmail },
             ],
           })
-          .sort({ _id: -1 })
+          .sort(sorter)
           .limit(LIMIT)
           .skip(startIndex);
       } else if (title && !tags) {
@@ -89,7 +113,7 @@ export const getTasksBySearch = async (req: any, res: any) => {
         tasks = await Task.find({
           $and: [{ title: title }, { creator: userEmail }],
         })
-          .sort({ _id: -1 })
+          .sort(sorter)
           .limit(LIMIT)
           .skip(startIndex);
       } else if (tags && !title) {
@@ -98,27 +122,11 @@ export const getTasksBySearch = async (req: any, res: any) => {
         });
         tasks = await Task.find(
           { $and: [{ tags: { $all: tags } }, { creator: userEmail }] })
-          .sort({ _id: -1 })
+          .sort(sorter)
           .limit(LIMIT)
           .skip(startIndex);
       }
-    } else if (!currentPage && tags) {
-      tasks = await Task.find(
-        { $and: [{ tags: { $in: tags } }, { creator: userEmail }] },
-        {
-          title: 1,
-          tags: 1,
-        }
-      );
-    } else {
-      tasks = await Task.find(
-        { $and: [{ tags: { $all: tags } }, { creator: userEmail }] },
-        {
-          tags: 1,
-          title: 1,
-        }
-      );
-    }
+    } 
     const numberOfPages =
       page !== "null" && total !== undefined ? Math.ceil(total / LIMIT) : null;
     res
