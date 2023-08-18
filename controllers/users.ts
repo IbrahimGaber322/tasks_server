@@ -144,7 +144,7 @@ export const forget= async(req:any, res:any) => {
         from: EMAIL_USER,
         to: email,
         subject: 'Reset your password',
-        html: `<p>Hi ${name}, Please click on the link below to reset your password:</p><a href="${FRONTEND_URL}/resetpassword/${token}">Reset your password</a>`
+        html: `<p>Hi ${name}, Please click on the link below to reset your password:</p><a href="${FRONTEND_URL}/reset/${token}">Reset your password</a>`
       };
       
       transporter.sendMail(mailOptions, function(error, info){
