@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get('/',user, getTasks);
 router.get('/:id',user, getTask);
-router.get('/search',user,getTasksBySearch);
+router.get('/search/search',user,getTasksBySearch);
 router.post('/', user, createTask);
 router.patch('/:id/comments', user, comment);
 router.patch('/:id',user, updateTask);
