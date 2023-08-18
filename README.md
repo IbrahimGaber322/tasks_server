@@ -38,8 +38,10 @@ JWTSECRET=# Replace with your preferred JWT secret
 
 ## Usage
 
-To start the Task Server, use the following command:
-
+To start the Task Server, use the following commands:
+```
+npm run build
+```
 ```
 npm start
 ```
