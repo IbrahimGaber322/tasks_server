@@ -1,4 +1,4 @@
-# Task Server Readme
+# Tasks Server Readme
 
 This repository contains the backend code for the Task Manager Application. It is built using Node.js, Express.js, and MongoDB.
 
