@@ -343,7 +343,7 @@ export const sendConfirm = async (req: any, res: any) => {
       from: EMAIL_USER,
       to: existingUser.email,
       subject: "Confirm your account",
-      html: `<p>Hi ${existingUser.name},</p><p>Thank you for signing up to our service. Please click on the link below to confirm your account:</p><a href="${FRONTEND_URL}confirm/${confirmToken}">Confirm your account</a>`,
+      html: `<p>Hi ${existingUser.name},</p><p>Thank you for signing up to our service. Please click on the link below to confirm your account:</p><a href="${FRONTEND_URL}/confirm/${confirmToken}">Confirm your account</a>`,
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
