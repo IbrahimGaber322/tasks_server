@@ -45,10 +45,10 @@ export const signUp = async (req: any, res: any) => {
     const newTempUser = new TempUser({ ...user, password: hashedPassword });
     await newTempUser.save();
 
-    const { name, email, firstName, lastName, confirmed, _id } = newTempUser;
+    const { name, email, firstName, lastName, confirmed } = newTempUser;
 
     // Generate a JWT token for email confirmation
-    const verificationToken = jwt.sign({ _id: _id }, JWT_SECRET, {
+    const verificationToken = jwt.sign({ email: email }, JWT_SECRET, {
       expiresIn: "5min",
     });
 
@@ -93,6 +93,8 @@ export const confirm = async (req: any, res: any) => {
     // Verify the token and extract the user Email
     const decodedToken: any = jwt.verify(token, JWT_SECRET);
     const tokenEmail = decodedToken.email;
+
+    console.log(tokenEmail);
     // Update the TempUser as confirmed and retrieve its data
     const tempUser = await TempUser.findOneAndUpdate(
       { email: tokenEmail },
@@ -157,7 +159,7 @@ export const signIn = async (req: any, res: any) => {
       const tempUser = await TempUser.findOne({ email: user.email });
 
       if (tempUser) {
-        const { name, email, _id, confirmed, firstName, lastName } = tempUser;
+        const { name, email, confirmed, firstName, lastName } = tempUser;
 
         // Validate the provided password
         const passwordValidate = await bcrypt.compare(
@@ -168,7 +170,7 @@ export const signIn = async (req: any, res: any) => {
           return res.status(400).json({ message: "Password is incorrect." });
         } else {
           // Generate a verification token for confirmation link
-          const verificationToken = jwt.sign({ _id: _id }, JWT_SECRET, {
+          const verificationToken = jwt.sign({ email: email }, JWT_SECRET, {
             expiresIn: "5min",
           });
 
@@ -256,7 +258,7 @@ export const forget = async (req: any, res: any) => {
     const { name, email, _id } = user;
 
     // Generate a token for password reset link
-    const token = jwt.sign({ _id: _id }, JWT_SECRET, { expiresIn: "5min" });
+    const token = jwt.sign({ email: email }, JWT_SECRET, { expiresIn: "5min" });
 
     // Send an email with the password reset link
     const mailOptions = {
@@ -293,14 +295,11 @@ export const reset = async (req: any, res: any) => {
   try {
     // Verify the token and extract user's ID
     const decodedToken: any = jwt.verify(token, JWT_SECRET);
-    const _id = decodedToken._id;
-
-    // Find the user by ID
-    const user = await User.findById(_id);
+    const email = decodedToken.email;
 
     // Hash the new password and update it in the database
     const hashedPassword = await bcrypt.hash(password, 12);
-    await User.findByIdAndUpdate(_id, { password: hashedPassword });
+    await User.findOneAndUpdate({ email: email }, { password: hashedPassword });
 
     // Respond with success message
     res.status(200).json({ message: "Password reset successfully" });
