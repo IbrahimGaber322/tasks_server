@@ -154,41 +154,50 @@ export const signIn = async (req: any, res: any) => {
       if (tempUser) {
         const { name, email, _id, confirmed, firstName, lastName } = tempUser;
 
-        // Generate a verification token for confirmation link
-        const verificationToken = jwt.sign({ _id: _id }, JWT_SECRET, {
-          expiresIn: "5min",
-        });
+        // Validate the provided password
+        const passwordValidate = await bcrypt.compare(
+          user.password,
+          tempUser.password
+        );
+        if (!passwordValidate) {
+          return res.status(400).json({ message: "Password is incorrect." });
+        } else {
+          // Generate a verification token for confirmation link
+          const verificationToken = jwt.sign({ _id: _id }, JWT_SECRET, {
+            expiresIn: "5min",
+          });
 
-        // Generate a JWT token for the user
-        const token = jwt.sign({ email: email }, JWT_SECRET, {
-          expiresIn: "24h",
-        });
+          // Generate a JWT token for the user
+          const token = jwt.sign({ email: email }, JWT_SECRET, {
+            expiresIn: "24h",
+          });
 
-        // Send an email with the confirmation link
-        const mailOptions = {
-          from: EMAIL_USER,
-          to: email,
-          subject: "Confirm your account",
-          html: `<p>Hi ${name},</p><p>Thank you for signing up to our service. Please click on the link below to confirm your account:</p><a href="${FRONTEND_URL}/confirmEmail/${verificationToken}">Confirm your account</a>`,
-        };
+          // Send an email with the confirmation link
+          const mailOptions = {
+            from: EMAIL_USER,
+            to: email,
+            subject: "Confirm your account",
+            html: `<p>Hi ${name},</p><p>Thank you for signing up to our service. Please click on the link below to confirm your account:</p><a href="${FRONTEND_URL}/confirmEmail/${verificationToken}">Confirm your account</a>`,
+          };
 
-        transporter.sendMail(mailOptions, function (error, info) {
-          if (error) {
-            console.log(error);
-          } else {
-            console.log("Email sent: " + info.response);
-          }
-        });
+          transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+              console.log(error);
+            } else {
+              console.log("Email sent: " + info.response);
+            }
+          });
 
-        // Respond with user information and tokens
-        res.status(200).json({
-          confirmed,
-          token,
-          email,
-          name,
-          firstName,
-          lastName,
-        });
+          // Respond with user information and tokens
+          res.status(200).json({
+            confirmed,
+            token,
+            email,
+            name,
+            firstName,
+            lastName,
+          });
+        }
       } else {
         // User doesn't exist in both User and TempUser collections
         res.status(404).json({ message: "User doesn't exist." });
