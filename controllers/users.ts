@@ -84,13 +84,12 @@ export const signUp = async (req: any, res: any) => {
 export const confirm = async (req: any, res: any) => {
   const { token } = req.params;
   try {
-    // Verify the token and extract the user ID
+    // Verify the token and extract the user Email
     const decodedToken: any = jwt.verify(token, JWT_SECRET);
-    const _id = decodedToken._id;
-
+    const tokenEmail = decodedToken.email;
     // Update the TempUser as confirmed and retrieve its data
     const tempUser = await TempUser.findOneAndUpdate(
-      { _id: _id },
+      { email: tokenEmail },
       { confirmed: true },
       { new: true }
     );
@@ -177,7 +176,7 @@ export const signIn = async (req: any, res: any) => {
             from: EMAIL_USER,
             to: email,
             subject: "Confirm your account",
-            html: `<p>Hi ${name},</p><p>Thank you for signing up to our service. Please click on the link below to confirm your account:</p><a href="${FRONTEND_URL}/confirmEmail/${verificationToken}">Confirm your account</a>`,
+            html: `<p>Hi ${name},</p><p>Thank you for signing up to our service. Please click on the link below to confirm your account:</p><a href="${FRONTEND_URL}/confirm/${verificationToken}">Confirm your account</a>`,
           };
 
           transporter.sendMail(mailOptions, function (error, info) {
