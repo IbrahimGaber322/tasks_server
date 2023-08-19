@@ -45,19 +45,23 @@ export const signUp = async (req: any, res: any) => {
     const newTempUser = new TempUser({ ...user, password: hashedPassword });
     await newTempUser.save();
 
-    const { name, email, _id } = newTempUser;
+    const { name, email, firstName, lastName, confirmed, _id } = newTempUser;
 
     // Generate a JWT token for email confirmation
-    const token = jwt.sign({ _id: _id }, JWT_SECRET, {
+    const verificationToken = jwt.sign({ _id: _id }, JWT_SECRET, {
       expiresIn: "5min",
     });
 
+    // Generate a JWT token for user
+    const token = jwt.sign({ email: email }, JWT_SECRET, {
+      expiresIn: "24h",
+    });
     // Send an email with confirmation link
     const mailOptions = {
       from: EMAIL_USER,
       to: email,
       subject: "Confirm your account",
-      html: `<p>Hi ${name},</p><p>Thank you for signing up to our service. Please click on the link below to confirm your account:</p><a href="${FRONTEND_URL}/confirm/${token}">Confirm your account</a>`,
+      html: `<p>Hi ${name},</p><p>Thank you for signing up to our service. Please click on the link below to confirm your account:</p><a href="${FRONTEND_URL}/confirm/${verificationToken}">Confirm your account</a>`,
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
@@ -69,7 +73,9 @@ export const signUp = async (req: any, res: any) => {
     });
 
     // Respond with confirmation message
-    res.status(200).json({ message: "Need confirmation" });
+    res
+      .status(200)
+      .json({ name, email, firstName, lastName, confirmed, token });
   } catch (error) {
     res.status(500).json({ message: "Database error" });
   }
