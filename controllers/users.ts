@@ -319,7 +319,7 @@ export const sendConfirm = async (req: any, res: any) => {
     const email = decodedToken.email;
 
     // Find the user by email
-    const existingUser = await User.findOne({ email: email });
+    const existingUser = await TempUser.findOne({ email: email });
 
     if (!existingUser) {
       return res
